@@ -1,26 +1,130 @@
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --paper: #f3f5f2;
+  --surface: #fbfcfa;
+  --ink: #1b2430;
+  --ink-2: #4a5563;
+  --ink-3: #6b7480;
+  --line: #d3dad5;
+  --line-strong: #aab5ae;
+  --work: #2f6f5e;
+  --work-soft: #d6e7e0;
+  --wait: #b8901a;
+  --wait-soft: #f2e6c2;
+  --hard: #a63d57;
+  --hard-soft: #f3dbe1;
+  --focus: #2d5fd6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #141a20;
+    --surface: #1a2129;
+    --ink: #e7ece9;
+    --ink-2: #b5bfc7;
+    --ink-3: #8c97a1;
+    --line: #2c3640;
+    --line-strong: #47535e;
+    --work: #5fb59a;
+    --work-soft: #1f3a32;
+    --wait: #dcb441;
+    --wait-soft: #3d331a;
+    --hard: #e07a93;
+    --hard-soft: #43232c;
+    --focus: #7aa2ff;
   }
 }
 
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-work: var(--work);
+  --color-work-soft: var(--work-soft);
+  --color-wait: var(--wait);
+  --color-wait-soft: var(--wait-soft);
+  --color-hard: var(--hard);
+  --color-hard-soft: var(--hard-soft);
+  --font-display: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+}
+
+/* Range tails on the timeline: hatched so ranges read without relying on color. */
+.tail-work {
+  background: repeating-linear-gradient(-45deg, var(--work) 0 2px, transparent 2px 6px);
+  opacity: 0.55;
+}
+.tail-wait {
+  background: repeating-linear-gradient(-45deg, var(--wait) 0 2px, transparent 2px 6px);
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .grow-in {
+    animation: grow 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    transform-origin: left center;
+  }
+  @keyframes grow {
+    from {
+      transform: scaleX(0);
+    }
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html {
+    background: white;
+  }
 }

@@ -1,0 +1,284 @@
+{
+  "slug": "linkedin",
+  "name": "LinkedIn",
+  "website": "https://www.linkedin.com",
+  "category": "Social",
+  "summary": "Sign-in and posting on a member's behalf are self-serve. Anything richer (company pages, analytics, ads, sales) needs a partner program approval tied to a verified business and LinkedIn Page.",
+  "scenario": "An agent that posts and manages content for members and their company pages.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory. Composio's LinkedIn page links to a guide for creating your own OAuth2 credentials.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://www.linkedin.com/developers/apps",
+    "accountNeeded": "A LinkedIn member account and a LinkedIn Page for your company."
+  },
+  "endpoints": {
+    "authorize": "https://www.linkedin.com/oauth/v2/authorization",
+    "token": "https://www.linkedin.com/oauth/v2/accessToken",
+    "discovery": "https://www.linkedin.com/oauth/.well-known/openid-configuration"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "yes",
+      "detail": "Community Management API requires a verified website, domain and privacy policy; self-serve products don't.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "unknown",
+      "detail": "Community Management starts at a Development tier before Standard tier approval; limits were not stated on the page checked.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "businessVerification": {
+      "value": "yes",
+      "detail": "Community Management API: registered legal entity, verified business email, and verification by a super admin of your LinkedIn Page.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "adminApproval": {
+      "value": "no",
+      "detail": "Members authorize for themselves; Page actions require the member to hold a Page admin role.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    "appReview": {
+      "value": "yes",
+      "detail": "None for Sign In with LinkedIn (OpenID) and Share on LinkedIn; required for Advertising, Community Management, Sales Navigator and Talent APIs.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s2"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "No fee for Community Management access; ads, sales and talent APIs need separate partner approval.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s2"
+      ]
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "Standard tier review checks security and data storage compliance, but no third-party assessment is described.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 1,
+      "max": 5,
+      "unit": "days"
+    },
+    "approvalWait": {
+      "min": 1,
+      "max": 8,
+      "unit": "weeks"
+    },
+    "note": "Self-serve products have no wait. LinkedIn publishes no partner review times; the range is an estimate for Development plus Standard tier reviews.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "s1",
+      "s2"
+    ]
+  },
+  "nextStep": "Decide whether member posting (w_member_social) is enough. If yes, create the app and add 'Sign in with LinkedIn using OpenID Connect' and 'Share on LinkedIn' products. If you need company pages, start the Community Management Development tier request with a business email.",
+  "prerequisites": [
+    {
+      "text": "A LinkedIn Page for your company with a super admin who can verify the app.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "text": "For Community Management: registered legal entity, business email, website and privacy policy.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create the developer app",
+      "detail": "Create an app in the LinkedIn Developer Portal and associate it with your company Page.",
+      "owner": "you",
+      "link": "https://www.linkedin.com/developers/apps/new",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "id": "2",
+      "phase": "configure",
+      "title": "Add self-serve products",
+      "detail": "Products tab → add Sign in with LinkedIn using OpenID Connect (profile, email) and Share on LinkedIn (w_member_social).",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "review",
+      "title": "Request Community Management Development tier",
+      "detail": "Fill in legal name, address, website, privacy policy and a verified business email; your Page super admin verifies the app.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "4",
+      "phase": "review",
+      "title": "Apply for Standard tier",
+      "detail": "After integrating, submit a company overview, use case, test credentials and a narrated screen recording covering each use case.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "openid profile email",
+      "purpose": "Sign in and basic profile.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "name": "w_member_social",
+      "purpose": "Post, comment and like as the member.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "name": "Community Management API permissions",
+      "purpose": "Manage company Page posts and analytics.",
+      "sensitivity": "restricted",
+      "triggersReview": true,
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "Two-step review for Community Management (Development, then Standard tier); separate partner applications for ads, sales and talent APIs.",
+    "triggers": [
+      "Requesting any non-self-serve product"
+    ],
+    "reviewersCheck": [
+      "Approved use case",
+      "Verified business email, organization, website and domain",
+      "Page admin verification",
+      "Privacy policy, terms, data storage compliance",
+      "Screen recording of core functionality"
+    ],
+    "meanwhile": "Self-serve sign-in and member posting work immediately.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1",
+      "s2"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Rejected for using a personal email.",
+      "fix": "Use and verify a business email on your company domain.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "issue": "Rejected and can't reapply with the same app.",
+      "fix": "Create a new app and submit a new Development tier request.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "issue": "App name or logo uses LinkedIn branding.",
+      "fix": "Remove any LinkedIn or Microsoft names and logos.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "Compliance permissions are closed and can't be requested.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "Partner review durations are not published.",
+    "Development tier usage limits were not stated on the page checked."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "LinkedIn: Getting access to LinkedIn APIs",
+      "url": "https://learn.microsoft.com/en-gb/linkedin/shared/authentication/getting-access",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s2",
+      "title": "LinkedIn: Community Management app review",
+      "url": "https://learn.microsoft.com/en-us/linkedin/marketing/community-management-app-review",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio KB: LinkedIn toolkit",
+      "url": "https://docs.composio.dev/kb/toolkit/linkedin",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Scored for the scenario that includes company Pages, which requires Community Management API approval. Member-only posting is self-serve and noted in the guide."
+    ]
+  }
+}

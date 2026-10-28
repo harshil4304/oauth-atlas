@@ -1,0 +1,259 @@
+{
+  "slug": "notion",
+  "name": "Notion",
+  "website": "https://www.notion.com",
+  "category": "Docs & knowledge",
+  "summary": "Mostly self-serve: create a public connection in Notion's developer portal and users pick which pages to share. Notion's docs say the authorization URL appears after you submit the connection for review, so expect a short review step.",
+  "scenario": "An agent that reads and updates Notion pages and databases that each user chooses to share.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory for the Notion toolkit.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://www.notion.so/profile/integrations",
+    "accountNeeded": "A Notion account with a workspace to develop in."
+  },
+  "endpoints": {
+    "authorize": "https://api.notion.com/v1/oauth/authorize",
+    "token": "https://api.notion.com/v1/oauth/token"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "unknown",
+      "detail": "The pages checked don't list privacy policy or website requirements for public connections.",
+      "evidence": "uncertain",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "no",
+      "detail": "No user cap mentioned.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "businessVerification": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "adminApproval": {
+      "value": "no",
+      "detail": "Each user authorizes individually and picks pages; no workspace admin step is described.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "appReview": {
+      "value": "unknown",
+      "detail": "The authorization docs say the Authorization URL populates after the public connection is submitted for review, but criteria and timing are not described.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 30,
+      "max": 90,
+      "unit": "minutes"
+    },
+    "approvalWait": null,
+    "note": "Notion does not publish a review time for public connections; treat any wait as unknown.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "s2"
+    ]
+  },
+  "nextStep": "In Notion's developer portal go to Build → Public connections → Create new connection, choose 'Any workspace' (this can't be changed later) and add your redirect URI.",
+  "prerequisites": [
+    {
+      "text": "Decide the installation scope up front: 'Any workspace' is required for Marketplace eligibility and cannot be changed after creation.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create a public connection",
+      "detail": "Developer portal → Build → Public connections → Create new connection. Set name, development workspace, installation scope and capabilities (read, update, insert content).",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "configure",
+      "title": "Add redirect URIs",
+      "detail": "Add each redirect URI (local, production, Composio's) in the OAuth configuration.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "review",
+      "title": "Submit and get the authorization URL",
+      "detail": "Submit the connection; the Authorization URL field is filled in after submission for review.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "4",
+      "phase": "configure",
+      "title": "Implement token exchange and refresh",
+      "detail": "Exchange the code at /v1/oauth/token with HTTP Basic auth, store both tokens, and save the new pair on every refresh.",
+      "owner": "agent",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "5",
+      "phase": "test",
+      "title": "Test page sharing",
+      "detail": "Authorize with your account and confirm the agent can see only the pages you picked in the page picker.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "Capabilities: read / update / insert content",
+      "purpose": "Notion uses capabilities on the connection rather than OAuth scope strings; users also pick which pages to share.",
+      "sensitivity": "basic",
+      "triggersReview": null,
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "A submission step exists before you get the authorization URL; Marketplace listing is managed separately.",
+    "triggers": [
+      "Submitting a public connection",
+      "Listing on the Notion Marketplace"
+    ],
+    "reviewersCheck": [
+      "Not documented on the pages checked"
+    ],
+    "meanwhile": "Build and test against your development workspace.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "s1",
+      "s2"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Agent can't see a page the user expects.",
+      "fix": "Users choose pages in the OAuth page picker; ask them to re-authorize and add the page.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "issue": "Connection created with 'Selected workspaces only' can't be listed publicly.",
+      "fix": "Create a new connection with 'Any workspace'; scope can't be edited.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "Only the authorizing user can use the connection; each teammate authorizes separately.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Refreshing returns a new access token and a new refresh token; store both every time.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "Whether Notion's review blocks use by other workspaces, and how long it takes.",
+    "Required listing fields (privacy policy, website) for public connections."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Notion: Public connections",
+      "url": "https://developers.notion.com/guides/get-started/public-integrations",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s2",
+      "title": "Notion: Authorization",
+      "url": "https://developers.notion.com/docs/authorization",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Expected 'no review'. Notion's own auth docs mention submitting the connection for review, so app review is now marked unknown rather than no."
+    ]
+  }
+}

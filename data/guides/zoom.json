@@ -1,0 +1,226 @@
+{
+  "slug": "zoom",
+  "name": "Zoom",
+  "website": "https://zoom.us",
+  "category": "Meetings",
+  "summary": "A private app only works for users on your own Zoom account. To let other companies connect, you need Zoom's approval: a beta review to share with a few external users, or a Marketplace review to publish (listed or unlisted).",
+  "scenario": "An agent that schedules meetings and fetches recordings and transcripts for users in other Zoom accounts.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory for the Zoom toolkit.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://marketplace.zoom.us/develop/create",
+    "accountNeeded": "A Zoom account with developer access to the App Marketplace."
+  },
+  "endpoints": {
+    "authorize": "https://zoom.us/oauth/authorize",
+    "token": "https://zoom.us/oauth/token"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "yes",
+      "detail": "Published and unlisted apps need listing metadata (images, descriptions, categories) or they fail review.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "yes",
+      "detail": "Private apps are restricted to users on your account; approved beta apps reach only a limited number of external users for a limited time.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "businessVerification": {
+      "value": "unknown",
+      "detail": "Not described on the page checked.",
+      "evidence": "uncertain",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "adminApproval": {
+      "value": "depends",
+      "detail": "Admin-managed apps are added by account admins; user-managed apps are authorized per user.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "appReview": {
+      "value": "yes",
+      "detail": "Required before anyone outside your account can authorize: beta approval or a quality and security review for publishing.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    "securityAssessment": {
+      "value": "unknown",
+      "detail": "Zoom describes a 'rigorous quality and security review' for published apps; whether that includes a third-party assessment isn't stated.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 1,
+      "max": 3,
+      "unit": "days"
+    },
+    "approvalWait": {
+      "min": 1,
+      "max": 6,
+      "unit": "weeks"
+    },
+    "note": "Zoom's key concepts page gives no review timeline. The range here is a placeholder estimate, not a sourced figure.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "s1"
+    ]
+  },
+  "nextStep": "Create a General (user-managed) OAuth app on the Zoom App Marketplace, test it with your own account, and prepare technical design documentation to request beta or publishing approval.",
+  "prerequisites": [
+    {
+      "text": "Technical design documentation and supporting evidence for Zoom's beta review.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create a user-managed OAuth app",
+      "detail": "On the App Marketplace build flow, create an app that users authorize individually with OAuth.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "test",
+      "title": "Test inside your own account",
+      "detail": "Private apps work for users on your Zoom account via the authorization URL.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "review",
+      "title": "Request beta approval for pilots",
+      "detail": "Ask Zoom for approval to share the authorization URL with external users; Zoom reviews your technical design docs.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "4",
+      "phase": "review",
+      "title": "Submit for publishing (listed or unlisted)",
+      "detail": "Complete listing metadata and submit for the quality and security review. Unlisted apps are still reviewed.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "scopes": [],
+  "review": {
+    "summary": "Needed for any external account: beta approval for limited pilots, or full review to publish.",
+    "triggers": [
+      "Sharing with users outside your Zoom account",
+      "Joining meetings hosted by other accounts (requires unlisted or published)"
+    ],
+    "reviewersCheck": [
+      "Technical design documentation (beta)",
+      "Quality and security review (publishing)",
+      "Complete listing metadata"
+    ],
+    "meanwhile": "Use and demo the app inside your own Zoom account.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Customer gets an error authorizing your app.",
+      "fix": "Private apps only work on your account. Request beta approval or publish (unlisted is fine).",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "issue": "Unlisted submission fails.",
+      "fix": "Unlisted apps still need images, descriptions and categories.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "Admin-managed apps act for a whole account; user-managed apps need each user to authorize.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "No official review timeline found.",
+    "Scope names not checked in this pass."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Zoom: Key concepts for the Developer Platform",
+      "url": "https://developers.zoom.us/docs/platform/key-concepts/",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Expected unpublished OAuth apps to work for anyone with the link. Zoom restricts private apps to your own account; external use needs beta approval or publishing."
+    ]
+  }
+}

@@ -1,0 +1,255 @@
+{
+  "slug": "hubspot",
+  "name": "HubSpot",
+  "website": "https://www.hubspot.com",
+  "category": "CRM",
+  "summary": "Building is self-serve, but since September 2025 new marketplace-distribution apps are capped at 25 installs until listed, and listing needs 3 active customer installs plus a review of up to about 2 months.",
+  "scenario": "An agent that reads and updates CRM contacts, companies and deals in customers' HubSpot accounts.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory for the HubSpot toolkit.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://developers.hubspot.com/",
+    "accountNeeded": "A HubSpot developer (app developer) account."
+  },
+  "endpoints": {
+    "authorize": "https://app.hubspot.com/oauth/authorize",
+    "token": "https://api.hubapi.com/oauth/v1/token"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "depends",
+      "detail": "Listing requires marketplace listing materials; not needed for up to 25 installs.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "yes",
+      "detail": "Marketplace-distribution apps are capped at 25 installs until listed. Private distribution allows 10 portals (100 for Solutions Partners).",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "businessVerification": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "adminApproval": {
+      "value": "unknown",
+      "detail": "Who in a customer account may install apps was not checked.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    "appReview": {
+      "value": "depends",
+      "detail": "Required only to exceed 25 installs (Marketplace listing).",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s2"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "Developer accounts are free.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 2,
+      "max": 6,
+      "unit": "hours"
+    },
+    "approvalWait": {
+      "min": 2,
+      "max": 9,
+      "unit": "weeks"
+    },
+    "note": "Initial review within 10 business days; the full feedback process should take no more than 60 days. Only needed past 25 installs.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1"
+    ]
+  },
+  "nextStep": "Create a developer account and a project-based app with marketplace distribution, add your redirect URL and CRM scopes, and test on a free test account.",
+  "prerequisites": [
+    {
+      "text": "To list: at least 3 active, unique installs from production accounts not affiliated with you, with successful API activity in the past 30 days.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create a developer account and app",
+      "detail": "Create the app on the current developer platform and choose marketplace distribution if you'll serve many customers.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "configure",
+      "title": "Add redirect URL and scopes",
+      "detail": "Configure OAuth redirect URLs and required/optional CRM scopes.",
+      "owner": "together",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "id": "3",
+      "phase": "test",
+      "title": "Install on a test account",
+      "detail": "Install on a developer test account and verify token refresh and API calls.",
+      "owner": "together",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "id": "4",
+      "phase": "launch",
+      "title": "Onboard first customers (up to 25)",
+      "detail": "Share the install URL with early customers; get 3 of them active to qualify for listing.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s2"
+      ]
+    },
+    {
+      "id": "5",
+      "phase": "review",
+      "title": "Submit the Marketplace listing",
+      "detail": "Submit one app at a time; a second submission during review is auto-rejected.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "crm.objects.contacts.read",
+      "purpose": "Read contacts.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "name": "crm.objects.contacts.write",
+      "purpose": "Update contacts.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    }
+  ],
+  "review": {
+    "summary": "Marketplace listing review lifts the 25-install cap.",
+    "triggers": [
+      "More than 25 installs"
+    ],
+    "reviewersCheck": [
+      "3+ active unaffiliated installs",
+      "Listing requirements"
+    ],
+    "meanwhile": "Up to 25 installs on marketplace distribution.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1",
+      "s2"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "26th customer can't install.",
+      "fix": "Hit the 25-install cap. Get listed, or use private distribution for a small set of portals.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "issue": "Listing submission auto-rejected.",
+      "fix": "Another of your apps is already under review; wait for it to finish.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "Legacy public apps migrated to the new platform with more than 25 installs have the cap enforced automatically.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "Scope names and endpoint URLs were not re-checked against current HubSpot docs in this pass."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "HubSpot: App Marketplace listing requirements",
+      "url": "https://developers.hubspot.com/docs/apps/developer-platform/list-apps/listing-your-app/app-marketplace-listing-requirements",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s2",
+      "title": "HubSpot changelog: New marketplace distribution app install limits",
+      "url": "https://developers.hubspot.com/changelog/new-marketplace-distribution-app-install-limits",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Expected 'no review unless you want a listing'. HubSpot's Sept 2025 change caps unlisted marketplace-distribution apps at 25 installs."
+    ]
+  }
+}

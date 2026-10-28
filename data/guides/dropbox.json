@@ -1,0 +1,244 @@
+{
+  "slug": "dropbox",
+  "name": "Dropbox",
+  "website": "https://www.dropbox.com",
+  "category": "Files & storage",
+  "summary": "Easy start in development mode, but there's a clock: once 50 users link your app you have two weeks to get production approval or new users are blocked.",
+  "scenario": "An agent that reads and organizes files in users' Dropbox accounts.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory for the Dropbox toolkit.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://www.dropbox.com/developers/apps",
+    "accountNeeded": "A Dropbox account."
+  },
+  "endpoints": {
+    "authorize": "https://www.dropbox.com/oauth2/authorize",
+    "token": "https://api.dropboxapi.com/oauth2/token"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "unknown",
+      "detail": "Production review contents were not visible on the pages checked.",
+      "evidence": "uncertain",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "yes",
+      "detail": "Development apps link up to 500 accounts; after 50 linked users you have two weeks to get production approval.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s2"
+      ]
+    },
+    "businessVerification": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "uncertain",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "adminApproval": {
+      "value": "no",
+      "detail": "No admin step described for individual accounts.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    "appReview": {
+      "value": "yes",
+      "detail": "Production approval is needed to share publicly; requests are reviewed once you have 50 linked users.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "Free.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 30,
+      "max": 120,
+      "unit": "minutes"
+    },
+    "approvalWait": {
+      "min": 1,
+      "max": 5,
+      "unit": "days"
+    },
+    "note": "Dropbox says it responds to nearly all production requests within a few business days.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1"
+    ]
+  },
+  "nextStep": "Create a scoped app in the App Console with the narrowest access type, pick the final app name now (you can't rename after production), and add your redirect URI.",
+  "prerequisites": [
+    {
+      "text": "Pick the final app name before applying for production; renaming afterward requires a support ticket.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create a scoped app",
+      "detail": "App Console → Create app → Scoped access, choose App folder or Full Dropbox, and name it.",
+      "owner": "you",
+      "link": "https://www.dropbox.com/developers/apps/create",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "id": "2",
+      "phase": "configure",
+      "title": "Select permissions and redirect URI",
+      "detail": "On the Permissions tab tick only the scopes you need; add redirect URIs on Settings.",
+      "owner": "you",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "id": "3",
+      "phase": "test",
+      "title": "Enable additional users for testing",
+      "detail": "On the app's info page, enable additional users so accounts beyond yours can link during development.",
+      "owner": "you",
+      "evidence": "community",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "4",
+      "phase": "review",
+      "title": "Apply for production early",
+      "detail": "Submit the production request before you hit 50 users; it won't be reviewed until 50, but the two-week clock starts then.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "5",
+      "phase": "launch",
+      "title": "Monitor linked users",
+      "detail": "Track linked-user count so you don't miss the window. An agent can set up the reminder.",
+      "owner": "agent",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "files.metadata.read",
+      "purpose": "List files and folders.",
+      "sensitivity": "basic",
+      "triggersReview": null,
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "name": "files.content.read",
+      "purpose": "Read file contents.",
+      "sensitivity": "basic",
+      "triggersReview": null,
+      "evidence": "uncertain",
+      "sourceIds": []
+    }
+  ],
+  "review": {
+    "summary": "Production approval, reviewed once the app reaches 50 linked users.",
+    "triggers": [
+      "Reaching 50 linked users",
+      "Sharing the app publicly"
+    ],
+    "reviewersCheck": [
+      "Not listed on the pages checked"
+    ],
+    "meanwhile": "Up to 500 accounts in development, subject to the 50-user window.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1",
+      "s2"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "New users can't link the app.",
+      "fix": "You passed the two-week window after 50 users without production approval. Apply and contact Dropbox support.",
+      "evidence": "community",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "Production review won't start until the app has at least 50 linked users, even if you apply earlier.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "The developer guide's production approval section was not reachable from the research environment; criteria are unconfirmed.",
+    "Scope names and console steps come from general knowledge, not a page checked in this pass."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Dropbox: Developer support",
+      "url": "https://www.dropbox.com/developers/support",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s2",
+      "title": "Dropbox forum (staff answer): development user limit",
+      "url": "https://community.dropbox.com/en/discussion/846671/does-a-dropbox-app-have-a-limit-on-development-users",
+      "kind": "community",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": []
+  }
+}

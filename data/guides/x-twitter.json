@@ -1,0 +1,279 @@
+{
+  "slug": "x-twitter",
+  "name": "X (Twitter)",
+  "website": "https://x.com",
+  "category": "Social",
+  "summary": "No approval queue, but every API call costs money: you buy pay-per-use credits in the X Developer Console before your agent can read or post.",
+  "scenario": "An agent that reads a user's timeline and mentions and posts on their behalf.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory for the Twitter/X toolkit.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://console.x.com",
+    "accountNeeded": "An X account and a payment card in the Developer Console."
+  },
+  "endpoints": {
+    "authorize": "https://x.com/i/oauth2/authorize",
+    "token": "https://api.x.com/2/oauth2/token"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "no",
+      "detail": "Callback URLs must match exactly; no policy verification described.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "no",
+      "detail": "No user cap, but pay-per-use plans cap Post reads at 3 million per month.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    },
+    "businessVerification": {
+      "value": "no",
+      "detail": "None described.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "adminApproval": {
+      "value": "no",
+      "detail": "Users authorize for themselves.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "appReview": {
+      "value": "no",
+      "detail": "No approval step described; apps can be suspended with an appeal process.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "yes",
+      "detail": "Pay-per-use credits (e.g. $0.005 per Post read, $0.015 per Post created). Commercial use at scale needs an Enterprise plan.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3",
+        "n1"
+      ]
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "None described.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 30,
+      "max": 120,
+      "unit": "minutes"
+    },
+    "approvalWait": null,
+    "note": "No review wait; budget and credits are the gate.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1",
+      "s3"
+    ]
+  },
+  "nextStep": "Create an app in console.x.com, set up OAuth 2.0 user authentication (Web App, confidential client) with your exact callback URL, buy credits and set a spending limit.",
+  "prerequisites": [
+    {
+      "text": "A payment card and a spending limit for pay-per-use credits.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create the app",
+      "detail": "In console.x.com click Create App and enter name, description and use case. Copy keys immediately; they're shown once.",
+      "owner": "you",
+      "link": "https://console.x.com",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "configure",
+      "title": "Set up OAuth 2.0 user authentication",
+      "detail": "Choose Web App (confidential client) and add callback URLs (max 10, exact match, https in production; use 127.0.0.1 not localhost locally).",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "configure",
+      "title": "Implement PKCE and offline access",
+      "detail": "Use authorization code with PKCE and request offline.access, or tokens expire after 2 hours with no refresh token.",
+      "owner": "agent",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "4",
+      "phase": "prepare",
+      "title": "Buy credits and set a cap",
+      "detail": "Purchase credits, set a per-cycle spending limit, and estimate cost per agent action.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "tweet.read users.read",
+      "purpose": "Read posts and profiles.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "name": "tweet.write",
+      "purpose": "Post on the user's behalf.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "name": "offline.access",
+      "purpose": "Get a refresh token.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "No approval queue. Cost is the main gate; apps can be suspended for policy violations.",
+    "triggers": [],
+    "reviewersCheck": [],
+    "meanwhile": "Usable as soon as you have credits.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1",
+      "s3"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Requests blocked mid-month.",
+      "fix": "You hit your spending limit or the 3M Post-read cap; raise the limit or move to Enterprise.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    },
+    {
+      "issue": "Users must reconnect every 2 hours.",
+      "fix": "Request offline.access to get refresh tokens.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "X replaced its $200/month entry plan with pay-per-use in 2026.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    },
+    {
+      "text": "Posts that include a URL cost far more to create ($0.20) than plain posts.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "Prices may change; X shows current rates in the Developer Console."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "X Docs: Developer apps",
+      "url": "https://docs.x.com/resources/fundamentals/developer-apps",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s2",
+      "title": "X Docs: OAuth 2.0 authorization code flow with PKCE",
+      "url": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s3",
+      "title": "X Docs: Pricing",
+      "url": "https://docs.x.com/x-api/getting-started/pricing",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "n1",
+      "title": "Open Terms Archive: X replaces its $200 plan with pay-per-use",
+      "url": "https://opentermsarchive.org/en/memos/x-replaces-its-dollar200-entry-level-api-plan-with-a-pay-per-use-model/",
+      "kind": "community",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Expected the $200/month Basic tier. X moved to pay-per-use credits in 2026."
+    ]
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "slug": "atlassian-jira",
+  "name": "Atlassian (Jira, Confluence)",
+  "website": "https://www.atlassian.com",
+  "category": "Project management",
+  "summary": "Self-serve: create an OAuth 2.0 (3LO) app in the developer console and turn on sharing. Users see an 'unreviewed app' warning unless you go through Marketplace approval.",
+  "scenario": "An agent that reads and updates Jira issues and Confluence pages for users in other Atlassian sites.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory for the Jira and Confluence toolkits.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://developer.atlassian.com/console/myapps/",
+    "accountNeeded": "An Atlassian account."
+  },
+  "endpoints": {
+    "authorize": "https://auth.atlassian.com/authorize",
+    "token": "https://auth.atlassian.com/oauth/token"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "unknown",
+      "detail": "The management page doesn't state requirements for enabling sharing; developers report a personal data declaration step.",
+      "evidence": "community",
+      "sourceIds": [
+        "s1",
+        "n1"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "no",
+      "detail": "No user cap mentioned; each user installs via the authorization URL.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "businessVerification": {
+      "value": "no",
+      "detail": "None mentioned.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "adminApproval": {
+      "value": "no",
+      "detail": "Apps install per user via the authorization link; no site-admin step is described on the page checked.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    "appReview": {
+      "value": "depends",
+      "detail": "Not needed to share. Optional approval through the Marketplace listing process removes the unreviewed-app warning.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "Free.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "None for 3LO sharing.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 30,
+      "max": 120,
+      "unit": "minutes"
+    },
+    "approvalWait": null,
+    "note": "No wait to share. Marketplace approval timing was not checked.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1"
+    ]
+  },
+  "nextStep": "Open the Atlassian developer console, create an OAuth 2.0 integration, add Jira/Confluence API scopes and your callback URL, then enable sharing under Distribution.",
+  "prerequisites": [
+    {
+      "text": "An Atlassian account and a test Jira or Confluence Cloud site.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create an OAuth 2.0 integration",
+      "detail": "Profile icon → Developer console → Create → OAuth 2.0 integration.",
+      "owner": "you",
+      "link": "https://developer.atlassian.com/console/myapps/",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "configure",
+      "title": "Add API scopes and callback URL",
+      "detail": "Under Permissions add the Jira and/or Confluence APIs and scopes; under Authorization add your callback URL.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "launch",
+      "title": "Enable sharing",
+      "detail": "Distribution → Enable sharing, then copy the Authorization URL from Authorization → OAuth 2.0 (3LO) → Configure.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "4",
+      "phase": "test",
+      "title": "Install with a second account",
+      "detail": "Open the authorization URL with another Atlassian account and confirm site selection and API calls (use the accessible-resources call to find the cloud ID).",
+      "owner": "together",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "id": "5",
+      "phase": "review",
+      "title": "Optional: request Marketplace approval",
+      "detail": "Follow the Marketplace listing steps to get reviewed; an informative listing is not required to submit.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "read:jira-work",
+      "purpose": "Read Jira projects and issues.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "name": "write:jira-work",
+      "purpose": "Create and edit issues.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "name": "offline_access",
+      "purpose": "Refresh tokens.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    }
+  ],
+  "review": {
+    "summary": "Optional. Unreviewed apps can be shared, but users see a warning.",
+    "triggers": [
+      "Wanting to remove the unreviewed warning or list on Marketplace"
+    ],
+    "reviewersCheck": [
+      "Not described on the page checked"
+    ],
+    "meanwhile": "Share the authorization URL with users directly.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Existing users lose access after you add scopes.",
+      "fix": "Changing scopes requires users to consent again; plan scope changes and prompt reconnects.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "issue": "Can't delete the app.",
+      "fix": "Uninstall it everywhere first; installed apps can't be deleted.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "Enabling sharing does not list the app on the Marketplace; 3LO apps can only have informational listings.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Apps install per user, so every user must go through the authorization link.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "Exact scope names and the personal data reporting requirement were not confirmed against official pages in this pass."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Atlassian: Managing OAuth 2.0 apps",
+      "url": "https://developer.atlassian.com/cloud/oauth/getting-started/managing-oauth-apps/",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "n1",
+      "title": "Atlassian community: Personal data reporting for OAuth 2.0 apps",
+      "url": "https://community.developer.atlassian.com/t/do-i-have-to-implement-personal-data-reporting-in-my-oauth2-app/54402",
+      "kind": "community",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": []
+  }
+}

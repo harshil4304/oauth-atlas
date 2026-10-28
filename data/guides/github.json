@@ -1,0 +1,315 @@
+{
+  "slug": "github",
+  "name": "GitHub",
+  "website": "https://github.com",
+  "category": "Developer tools",
+  "summary": "Self-serve: register an OAuth app in your GitHub settings and any GitHub user can connect right away. No provider review.",
+  "scenario": "An agent that reads repositories, issues and pull requests and comments on them for any GitHub user.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory. Composio suggests your own app for GitHub when the consent screen should show your name.",
+    "evidence": "official",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://github.com/settings/developers",
+    "accountNeeded": "Any GitHub account. Create it under an organization if the app belongs to your company."
+  },
+  "endpoints": {
+    "authorize": "https://github.com/login/oauth/authorize",
+    "token": "https://github.com/login/oauth/access_token"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "no",
+      "detail": "A homepage URL is required, but GitHub does not verify it or ask for a privacy policy.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "no",
+      "detail": "No user cap. Owners can have up to 100 OAuth apps.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "businessVerification": {
+      "value": "no",
+      "detail": "No business verification.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "adminApproval": {
+      "value": "depends",
+      "detail": "Organization owners must approve the app before members can use it on org data; new orgs restrict OAuth apps by default.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "appReview": {
+      "value": "no",
+      "detail": "The creation docs have no review or approval step. Organization owners may still need to approve the app for their org's data.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s2"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "Free.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "None.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 10,
+      "max": 30,
+      "unit": "minutes"
+    },
+    "approvalWait": null,
+    "note": "Users in organizations with OAuth app access restrictions must wait for an org owner to approve your app before it can see org repositories.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1",
+      "s2"
+    ]
+  },
+  "nextStep": "Open GitHub Settings → Developer settings → OAuth apps → New OAuth App, and paste your callback URL (for Composio, the redirect URI shown when you create a custom auth config).",
+  "prerequisites": [
+    {
+      "text": "A GitHub account (personal or an organization you administer).",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "text": "A public homepage URL and the exact callback URL your OAuth flow uses.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "prepare",
+      "title": "Pick OAuth app or GitHub App",
+      "detail": "OAuth apps act only as the user and get broad scopes like repo. GitHub Apps give fine-grained, per-repository permissions and short-lived tokens. GitHub recommends considering a GitHub App; use an OAuth app if your auth layer only supports classic OAuth.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "register",
+      "title": "Create the OAuth app",
+      "detail": "Settings → Developer settings → OAuth apps → New OAuth App. Enter app name, homepage URL, optional description and the authorization callback URL. Everything here is public.",
+      "owner": "you",
+      "link": "https://github.com/settings/applications/new",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "configure",
+      "title": "Add all callback URLs",
+      "detail": "Add up to 10 callback URLs (for example local, staging, production, or Composio's redirect URI).",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "4",
+      "phase": "configure",
+      "title": "Generate and store the client secret",
+      "detail": "Generate a client secret and put the client ID and secret into your secret manager or your Composio custom auth config. Never commit them.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "c1"
+      ]
+    },
+    {
+      "id": "5",
+      "phase": "configure",
+      "title": "Choose scopes in your authorize request",
+      "detail": "OAuth app scopes are requested at authorization time, not set in the app settings. Request the smallest set your agent needs.",
+      "owner": "agent",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    },
+    {
+      "id": "6",
+      "phase": "test",
+      "title": "Connect your own account",
+      "detail": "Run the authorize flow with your account and confirm token exchange, a test API call, and refresh if token expiry is on (it is on by default).",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "7",
+      "phase": "launch",
+      "title": "Tell org users about owner approval",
+      "detail": "New organizations restrict OAuth apps by default. Members request access from the consent flow and an org owner approves. Put this in your onboarding docs.",
+      "owner": "agent",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "repo",
+      "purpose": "Read and write private repositories, issues and pull requests.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    },
+    {
+      "name": "read:org",
+      "purpose": "Read organization membership.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    },
+    {
+      "name": "user:email",
+      "purpose": "Read the user's email addresses.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "No GitHub review. Each organization's owners can block or approve your app for that org's data.",
+    "triggers": [
+      "A user tries to access a restricted organization's resources"
+    ],
+    "reviewersCheck": [
+      "Org owners decide case by case; GitHub publishes no criteria for this."
+    ],
+    "meanwhile": "Personal repositories work immediately.",
+    "evidence": "official",
+    "sourceIds": [
+      "s2"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Agent can see personal repos but not the company's org repos.",
+      "fix": "The org has OAuth app access restrictions on. The user requests access in the consent flow and an org owner approves it, or switch to a GitHub App installed on the org.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "issue": "redirect_uri mismatch error.",
+      "fix": "Add the exact URL (scheme, host, path) as one of the up to 10 callback URLs.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "OAuth app scopes are coarse: repo grants access to all of a user's private repositories. A GitHub App limits access to selected repositories.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s3"
+      ]
+    },
+    {
+      "text": "'Expire user access tokens' is on by default; your integration must handle refresh tokens or you must untick it.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    }
+  ],
+  "uncertainties": [],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "GitHub Docs: Creating an OAuth app",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s2",
+      "title": "GitHub Docs: About OAuth app access restrictions",
+      "url": "https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s3",
+      "title": "GitHub Docs: Scopes for OAuth apps",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed vs custom auth",
+      "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Added org owner approval: new GitHub organizations restrict OAuth apps by default, which a 'no review' summary would hide."
+    ]
+  }
+}

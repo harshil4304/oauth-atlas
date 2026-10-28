@@ -1,0 +1,255 @@
+{
+  "slug": "salesforce",
+  "name": "Salesforce",
+  "website": "https://www.salesforce.com",
+  "category": "CRM",
+  "summary": "Since September 2025, new Salesforce users can't authorize a connected app their org hasn't installed, so you package the app from a Developer Edition org and each customer's admin installs it.",
+  "scenario": "An agent that reads and updates Salesforce records for users in customers' Salesforce orgs.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory for the Salesforce toolkit.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://developer.salesforce.com/signup",
+    "accountNeeded": "A Salesforce Developer Edition org (connected apps from production orgs aren't compatible with the packaging requirement)."
+  },
+  "endpoints": {
+    "authorize": "https://login.salesforce.com/services/oauth2/authorize",
+    "token": "https://login.salesforce.com/services/oauth2/token"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "no",
+      "detail": "None described for packaging.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "no",
+      "detail": "No cap; adoption is gated per org by admin installation instead.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1",
+        "n2"
+      ]
+    },
+    "businessVerification": {
+      "value": "no",
+      "detail": "Not for packaging; AppExchange listing is separate.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    },
+    "adminApproval": {
+      "value": "yes",
+      "detail": "Since Sept 2025 a customer admin must install the app (or grant a bypass permission) before new users can authorize.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1",
+        "n2"
+      ]
+    },
+    "appReview": {
+      "value": "no",
+      "detail": "No Salesforce review for distributing a package install link; customer admins are the gate (see admin approval). AppExchange listing is optional and separate.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "Developer Edition is free.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "Not for distribution by install link (this scenario). An AppExchange listing has its own security review, which was not checked.",
+      "evidence": "uncertain",
+      "sourceIds": []
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 1,
+      "max": 3,
+      "unit": "days"
+    },
+    "approvalWait": null,
+    "note": "No provider wait for an install link, but each customer's admin must install before users connect.",
+    "evidence": "community",
+    "sourceIds": [
+      "n1"
+    ]
+  },
+  "nextStep": "Sign up for a Developer Edition org, create an External Client App (or connected app) there, and plan to distribute it as a package with an install link for customer admins.",
+  "prerequisites": [
+    {
+      "text": "A Developer Edition org; production-org connected apps need to be recreated.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create a Developer Edition org",
+      "detail": "Sign up for a free Developer Edition org to own the app.",
+      "owner": "you",
+      "link": "https://developer.salesforce.com/signup",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "register",
+      "title": "Create an External Client App or connected app",
+      "detail": "Salesforce is steering developers to External Client Apps. If creating a connected app, you may need to allow creation under External Client App Settings.",
+      "owner": "you",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "configure",
+      "title": "Configure OAuth settings",
+      "detail": "Set the callback URL (e.g. Composio's) and OAuth scopes such as api and refresh_token.",
+      "owner": "together",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "id": "4",
+      "phase": "launch",
+      "title": "Package and get an install URL",
+      "detail": "Package the app (managed package) and share the install link Salesforce emails you.",
+      "owner": "you",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    },
+    {
+      "id": "5",
+      "phase": "launch",
+      "title": "Give customers admin install instructions",
+      "detail": "Customer admins install the package before users connect. An agent can write this guide.",
+      "owner": "agent",
+      "evidence": "community",
+      "sourceIds": [
+        "n1",
+        "n2"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "api",
+      "purpose": "Access Salesforce APIs.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "name": "refresh_token",
+      "purpose": "Offline access.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    }
+  ],
+  "review": {
+    "summary": "No central review for install links; customer admins are the gate.",
+    "triggers": [
+      "Each new customer org"
+    ],
+    "reviewersCheck": [
+      "Customer admins decide installation"
+    ],
+    "meanwhile": "Existing authorized users are unaffected; admins can grant 'Approve Uninstalled Connected Apps' temporarily as a workaround.",
+    "evidence": "community",
+    "sourceIds": [
+      "n1",
+      "n2"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Users get OAUTH_APPROVAL_ERROR_GENERIC.",
+      "fix": "The app isn't installed in their org. Have the admin install the package, or temporarily grant 'Approve Uninstalled Connected Apps'.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1",
+        "n2"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "'Use Any API Client' bypasses connected app restrictions but should be granted sparingly.",
+      "evidence": "community",
+      "sourceIds": [
+        "n2"
+      ]
+    },
+    {
+      "text": "The device flow is affected even for existing users.",
+      "evidence": "community",
+      "sourceIds": [
+        "n1"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "These facts come from integration vendors summarizing Salesforce's help article 005132365; the Salesforce article itself was not read in this pass.",
+    "AppExchange security review requirements and cost were not checked."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "n1",
+      "title": "Paragon: Salesforce connected app changes",
+      "url": "https://www.useparagon.com/blog/salesforce-connected-app-changes",
+      "kind": "community",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "n2",
+      "title": "MoveData: Salesforce connected app usage restrictions",
+      "url": "https://docs.movedata.io/troubleshooting/connection-and-authentication/salesforce-connected-app-usage-restrictions/",
+      "kind": "community",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Expected 'create a connected app and go'. The Sept 2025 usage restrictions mean customer admins must install the app first."
+    ]
+  }
+}

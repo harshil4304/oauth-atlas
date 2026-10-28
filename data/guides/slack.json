@@ -1,0 +1,312 @@
+{
+  "slug": "slack",
+  "name": "Slack",
+  "website": "https://slack.com",
+  "category": "Communication",
+  "summary": "Easy to start: turn on public distribution and any workspace can install. The catch for agents: unlisted apps get 1 request per minute on message history unless listed in the Slack Marketplace, which needs 10+ active workspaces and a review of up to 10 weeks.",
+  "scenario": "An agent that reads channel history and posts messages in customers' Slack workspaces.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory. Composio suggests your own app for Slack when users should see your name on the consent screen.",
+    "evidence": "official",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://api.slack.com/apps",
+    "accountNeeded": "A Slack account in a development workspace you can install apps into."
+  },
+  "endpoints": {
+    "authorize": "https://slack.com/oauth/v2/authorize",
+    "token": "https://slack.com/api/oauth.v2.access"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "depends",
+      "detail": "Not needed for unlisted distribution beyond HTTPS redirect URLs; Marketplace listing needs listing materials.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s3"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "no",
+      "detail": "No install cap for unlisted apps, but strict rate limits on history methods (see nuances).",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s2"
+      ]
+    },
+    "businessVerification": {
+      "value": "no",
+      "detail": "None described.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "adminApproval": {
+      "value": "depends",
+      "detail": "Some workspaces require admin approval for installs or allow only Marketplace apps.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "appReview": {
+      "value": "yes",
+      "detail": "For this scenario (reading history in customer workspaces), Marketplace listing is effectively required: unlisted apps get 1 request/min and 15 messages per call on history methods. Posting-only agents can skip review.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s2",
+        "s3"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "no",
+      "detail": "Free.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "No third-party assessment; Marketplace review includes Slack's own checks.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 1,
+      "max": 4,
+      "unit": "hours"
+    },
+    "approvalWait": {
+      "min": 2,
+      "max": 12,
+      "unit": "weeks"
+    },
+    "note": "The wait applies only if you list in the Marketplace: up to 10 business days for preliminary review, then up to 10 weeks for functional review of a new app. Unlisted distribution has no wait.",
+    "evidence": "official",
+    "sourceIds": [
+      "s3"
+    ]
+  },
+  "nextStep": "Create the app at api.slack.com/apps, add bot scopes and your HTTPS redirect URL, install it in your own workspace, then activate public distribution.",
+  "prerequisites": [
+    {
+      "text": "HTTPS for redirect, events and interactivity URLs before enabling distribution.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "text": "For Marketplace: installed on 10+ workspaces active in the last 28 days, plus support readiness.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Create the Slack app",
+      "detail": "At api.slack.com/apps create an app from scratch or from a manifest and pick a development workspace. An agent can write the app manifest for you.",
+      "owner": "together",
+      "link": "https://api.slack.com/apps",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "configure",
+      "title": "Add scopes and redirect URL",
+      "detail": "Under OAuth & Permissions add bot or user token scopes and your HTTPS redirect URL (e.g. Composio's). Request only what you use; admins weigh scopes when approving.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "test",
+      "title": "Install in your workspace",
+      "detail": "Install to the development workspace and test reading and posting.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "4",
+      "phase": "launch",
+      "title": "Activate public distribution",
+      "detail": "Manage Distribution → complete the checklist → Activate Public Distribution. You get an Add to Slack button and shareable install URL.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "5",
+      "phase": "review",
+      "title": "Decide on Marketplace listing",
+      "detail": "If your agent reads message history at scale, plan for Marketplace listing: reach 10 active workspaces, then submit for preliminary and functional review.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s2",
+        "s3"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "channels:history",
+      "purpose": "Read messages in public channels.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "name": "chat:write",
+      "purpose": "Post messages as the bot.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "name": "search:read",
+      "purpose": "Search a workspace.",
+      "sensitivity": "restricted",
+      "triggersReview": true,
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "Optional Marketplace review. Unlisted apps install without review but face reduced limits and some admins only allow Marketplace apps.",
+    "triggers": [
+      "Listing in the Slack Marketplace"
+    ],
+    "reviewersCheck": [
+      "App works fully and is publicly available",
+      "Tested on a non-development workspace",
+      "Scopes match real features; broad scopes like search:read or admin.* get pushback",
+      "Working test credentials for reviewers"
+    ],
+    "meanwhile": "Distribute unlisted to pilot customers; internal apps keep normal limits.",
+    "evidence": "official",
+    "sourceIds": [
+      "s1",
+      "s3"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Agent can only fetch 15 messages per minute from history.",
+      "fix": "Since May 29, 2025 new unlisted commercial apps get 1 request/min and 15 objects per call on conversations.history and conversations.replies. List in the Marketplace, or build as an internal app for a single customer.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "issue": "Customer workspace blocks the install.",
+      "fix": "Some admins allow only Marketplace apps or require approval; ask the admin to approve or pursue listing.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "issue": "Marketplace submission returned.",
+      "fix": "Remove scopes for unbuilt features, fix bugs, and provide reviewer install access rather than your own credentials.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "Turning off public distribution uninstalls the app from every workspace except your own.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Existing installations of older unlisted apps keep their previous rate limits; new installs get the new ones.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "Marketplace review times vary with volume; Slack shows an estimate on the submission page."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Slack: App distribution",
+      "url": "https://docs.slack.dev/distribution",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s2",
+      "title": "Slack changelog: Rate limit changes for non-Marketplace apps (May 2025)",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s3",
+      "title": "Slack Marketplace review guide",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed vs custom auth",
+      "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Original assumption was 'easy, optional review'. The May 2025 rate limits make Marketplace listing close to required for history-reading agents, so the score now ranges Easy to Medium."
+    ]
+  }
+}

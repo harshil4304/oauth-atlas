@@ -1,0 +1,334 @@
+{
+  "slug": "microsoft-outlook",
+  "name": "Microsoft 365 (Outlook, Graph)",
+  "website": "https://www.microsoft.com/microsoft-365",
+  "category": "Email & productivity",
+  "summary": "Registering is fast, but enterprise tenants increasingly only let users consent to apps from verified publishers, and publisher verification needs a verified Microsoft AI Cloud Partner Program account.",
+  "scenario": "A multitenant agent that reads mail and calendar via Microsoft Graph for users in other companies' Microsoft 365 tenants.",
+  "composio": {
+    "managed": "unknown",
+    "note": "Check the Composio managed OAuth directory for the Outlook toolkit.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "c1"
+    ]
+  },
+  "portal": {
+    "url": "https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade",
+    "accountNeeded": "A Microsoft Entra work or school tenant. Personal Microsoft account registrations can't be publisher verified."
+  },
+  "endpoints": {
+    "authorize": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+    "token": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+    "discovery": "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration"
+  },
+  "factors": {
+    "policyAndDomain": {
+      "value": "yes",
+      "detail": "A publisher domain must be set; for verification it must match your partner account's email domain or be DNS-verified in your tenant.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "userCapBeforeApproval": {
+      "value": "no",
+      "detail": "No numeric cap.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "businessVerification": {
+      "value": "yes",
+      "detail": "Publisher verification requires a verified Microsoft AI Cloud Partner Program (Partner One) account. Not strictly mandatory, but tenants using Microsoft's recommended consent policy block users from consenting to unverified apps.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2",
+        "s3"
+      ]
+    },
+    "adminApproval": {
+      "value": "depends",
+      "detail": "Tenants that restrict user consent, or permissions needing admin consent, require a tenant admin to grant consent.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s3"
+      ]
+    },
+    "appReview": {
+      "value": "no",
+      "detail": "No Microsoft review of the app itself; each tenant's admins decide via consent settings.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s3"
+      ]
+    },
+    "paidOrPartner": {
+      "value": "depends",
+      "detail": "Partner program membership is free and verification has no charge, but the partner account must pass business verification.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    "securityAssessment": {
+      "value": "no",
+      "detail": "Microsoft 365 App Certification is a separate, optional program.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  },
+  "time": {
+    "handsOn": {
+      "min": 2,
+      "max": 6,
+      "unit": "hours"
+    },
+    "approvalWait": {
+      "min": 1,
+      "max": 14,
+      "unit": "days"
+    },
+    "note": "Verification itself takes minutes if the partner account is already verified. The wait is for Partner Center business verification if you don't have it yet; Microsoft publishes no fixed time for that.",
+    "evidence": "uncertain",
+    "sourceIds": [
+      "s2"
+    ]
+  },
+  "nextStep": "Register a multitenant app in Microsoft Entra, add delegated Graph permissions and your redirect URI, and start Partner Center enrollment in parallel so publisher verification isn't the last-minute blocker.",
+  "prerequisites": [
+    {
+      "text": "An Entra work/school tenant with a DNS-verified custom domain (not *.onmicrosoft.com).",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "text": "A Microsoft AI Cloud Partner Program account that has completed verification, using the global account (PGA).",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Someone who is both Application Administrator in Entra and Partner Admin in Partner Center, with MFA.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "phase": "register",
+      "title": "Register a multitenant app",
+      "detail": "Entra admin center → App registrations → New registration. Choose accounts in any organizational directory (plus personal accounts if needed) and add your web redirect URI.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "2",
+      "phase": "configure",
+      "title": "Add delegated Graph permissions",
+      "detail": "Add only what the agent needs, e.g. Mail.Read, Mail.Send, Calendars.ReadWrite, offline_access. Avoid permissions that require admin consent unless your customers are admins.",
+      "owner": "together",
+      "evidence": "official",
+      "sourceIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "3",
+      "phase": "configure",
+      "title": "Create a client secret or certificate",
+      "detail": "Create a secret, note its expiry, and store it in your secret manager or Composio auth config.",
+      "owner": "you",
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "id": "4",
+      "phase": "prepare",
+      "title": "Set the publisher domain",
+      "detail": "Add and DNS-verify your company domain in the tenant and set it as the app's publisher domain.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "5",
+      "phase": "review",
+      "title": "Get the partner account verified",
+      "detail": "Enroll in the Microsoft AI Cloud Partner Program and complete Partner Center verification with a business email on your domain.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "6",
+      "phase": "review",
+      "title": "Mark the app publisher verified",
+      "detail": "In the app's Branding & properties, enter the Partner One ID and verify. The consent prompt then shows a blue verified badge.",
+      "owner": "you",
+      "evidence": "official",
+      "sourceIds": [
+        "s2",
+        "s1"
+      ]
+    },
+    {
+      "id": "7",
+      "phase": "launch",
+      "title": "Write an admin consent guide",
+      "detail": "Give customers an admin consent link and instructions for the admin consent workflow for tenants that block user consent. An agent can draft this.",
+      "owner": "agent",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s3"
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "Mail.Read",
+      "purpose": "Read the signed-in user's mail.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "name": "Mail.Send",
+      "purpose": "Send mail as the user.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    },
+    {
+      "name": "offline_access",
+      "purpose": "Get refresh tokens.",
+      "sensitivity": "basic",
+      "triggersReview": false,
+      "evidence": "uncertain",
+      "sourceIds": []
+    }
+  ],
+  "review": {
+    "summary": "No central app review. Adoption depends on each tenant's consent settings; verified publishers pass Microsoft's recommended policy.",
+    "triggers": [
+      "A tenant restricts user consent to verified publishers or low-impact permissions",
+      "Permissions that require admin consent"
+    ],
+    "reviewersCheck": [
+      "Tenant admins review the publisher name, verified badge, domain and requested permissions"
+    ],
+    "meanwhile": "Works immediately in your own tenant and in tenants that allow user consent for all apps (Microsoft's default).",
+    "evidence": "official",
+    "sourceIds": [
+      "s1",
+      "s3"
+    ]
+  },
+  "blockers": [
+    {
+      "issue": "Users see 'unverified' or are told to ask an admin.",
+      "fix": "Complete publisher verification, request fewer high-impact permissions, and give customers an admin consent link.",
+      "evidence": "official",
+      "sourceIds": [
+        "s1",
+        "s3"
+      ]
+    },
+    {
+      "issue": "Publisher verification fails: 'MPN ID does not exist' or domain mismatch.",
+      "fix": "Use the partner global account ID, finish Partner Center verification first, and make the verification email domain match the publisher domain.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    },
+    {
+      "issue": "Risky-app warning blocks consent.",
+      "fix": "Since Nov 2020, with risk-based step-up consent enabled, users can't consent to new unverified multitenant apps requesting more than basic sign-in. Verify the publisher.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "text": "Microsoft's default lets users consent to any app for non-admin permissions, but Microsoft recommends restricting consent to verified publishers, and many enterprises do.",
+      "evidence": "official",
+      "sourceIds": [
+        "s3"
+      ]
+    },
+    {
+      "text": "Apps registered with a personal Microsoft account, in B2C tenants or national clouds can't be publisher verified.",
+      "evidence": "official",
+      "sourceIds": [
+        "s2"
+      ]
+    }
+  ],
+  "uncertainties": [
+    "How long Partner Center business verification takes is not documented on the pages checked.",
+    "Graph permission names were not re-checked against the permissions reference in this pass.",
+    "Client secret maximum lifetime was not re-checked."
+  ],
+  "probes": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Microsoft Learn: Application consent experience",
+      "url": "https://learn.microsoft.com/entra/identity-platform/application-consent-experience",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s2",
+      "title": "Microsoft Learn: Publisher verification",
+      "url": "https://learn.microsoft.com/en-ca/entra/identity-platform/publisher-verification-overview",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "s3",
+      "title": "Microsoft Learn: Configure how users consent to applications",
+      "url": "https://learn.microsoft.com/en-gb/entra/identity/enterprise-apps/configure-user-consent",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    },
+    {
+      "id": "c1",
+      "title": "Composio: Managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "kind": "official",
+      "checkedAt": "2026-10-28"
+    }
+  ],
+  "meta": {
+    "origin": "library",
+    "lastVerified": "2026-10-28",
+    "corrections": [
+      "Clarified that publisher verification is not universally required: Microsoft's default consent setting still allows unverified apps, but its recommended setting blocks them."
+    ]
+  }
+}
