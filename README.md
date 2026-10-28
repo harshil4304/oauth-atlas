@@ -71,7 +71,7 @@ Agent quality is measured with `npm run eval`. It generates guides for hand-veri
 
 ## Run it locally
 
-Requires Node 20+.
+Requires Node 20.6+ (Node 22 LTS recommended).
 
 ```bash
 npm install
@@ -88,7 +88,7 @@ The library, compare, method and share pages work without any key. Only live gen
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Live generation | Server-side only; never sent to the browser |
 | `OAUTH_ATLAS_MODEL` | Optional | Defaults to `claude-sonnet-5-5` |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Durable share links for generated guides on Vercel | Without them, guides are saved to `.data/` locally or temporary storage on Vercel; the self-contained link always works |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (or `KV_REST_API_URL`, `KV_REST_API_TOKEN`) | Durable share links for generated guides on Vercel | Without them, guides are saved to `.data/` locally or temporary storage on Vercel; the self-contained link always works |
 | `COMPOSIO_API_KEY` | Optional | Fills in Composio-managed status for generated guides and for `npm run sync:composio` |
 | `GENERATE_PASSCODE` | Optional | Requires a passcode before spending API credits on new guides |
 

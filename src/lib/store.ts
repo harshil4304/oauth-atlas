@@ -13,8 +13,9 @@ const KEY = (slug: string) => `oauth-atlas:guide:${slug}`;
 const INDEX = "oauth-atlas:index";
 
 const upstash = () => {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Vercel's marketplace integration may use the KV_* names instead.
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   return url && token ? { url, token } : null;
 };
 
