@@ -4,7 +4,9 @@ import { runProbes } from "../probes";
 import { scoreGuide } from "../rubric";
 import { FACTOR_KEYS, Guide, type ProbeResult } from "../schema";
 import { slugify } from "../store";
-import { CHECK_SYSTEM, RESEARCH_SYSTEM } from "./prompts";
+import { geminiCheck, geminiKey, geminiModel, geminiResearchNotes, geminiStructured, newGeminiClient, structurePrompt, type GeminiLike } from "./gemini";
+import { CHECK_SYSTEM, GEMINI_STRUCTURE_SYSTEM, RESEARCH_SYSTEM } from "./prompts";
+import { normalizeUrl } from "./web";
 
 export type AgentEvent =
   | { type: "stage"; stage: "research" | "probe" | "check" | "score" | "save"; message: string }
@@ -43,6 +45,28 @@ const toInputSchema = (s: z.ZodType) => {
 };
 
 const model = () => process.env.OAUTH_ATLAS_MODEL || "claude-sonnet-5-5";
+
+export type Provider = "anthropic" | "gemini";
+
+/** LLM_PROVIDER wins; otherwise a Gemini key selects Gemini, then an Anthropic key selects Claude. */
+export function pickProvider(): Provider | null {
+  const p = process.env.LLM_PROVIDER?.trim().toLowerCase();
+  if (p === "gemini" || p === "anthropic") return p;
+  if (geminiKey()) return "gemini";
+  if (process.env.ANTHROPIC_API_KEY) return "anthropic";
+  return null;
+}
+
+export const providerModel = (p: Provider) => (p === "gemini" ? geminiModel() : model());
+
+/** Envelope for the Gemini structuring call (one schema covers both outcomes). */
+const GeminiEnvelope = z
+  .object({
+    status: z.enum(["guide", "not_oauth"]),
+    guide: Draft.optional(),
+    notOauth: NotOauth.optional(),
+  })
+  .refine((e) => (e.status === "guide" ? !!e.guide : !!e.notOauth), { message: "Fill guide when status is guide, notOauth when status is not_oauth" });
 
 /** Runs one model turn with server tools, continuing through pause_turn, and reports search/fetch activity. */
 async function runTurn(
@@ -183,10 +207,9 @@ function collectClaims(d: Draft, uncertainties: string[]): CheckableClaim[] {
   return claims.filter((c) => c.urls.length > 0);
 }
 
-async function check(client: Anthropic, d: Draft, emit: Emit) {
-  const uncertainties: string[] = [];
-  const claims = collectClaims(d, uncertainties);
-  if (!claims.length) return { checked: 0, supported: 0, downgraded: 0, notes: [], uncertainties };
+type Verdict = z.infer<typeof Verdicts>["verdicts"][number];
+
+async function claudeVerdicts(client: Anthropic, d: Draft, claims: CheckableClaim[], emit: Emit): Promise<Verdict[] | null> {
   const list = claims.map((c) => `[${c.id}] ${c.text}\n  cited: ${c.urls.join(" , ")}`).join("\n");
   const tools: Anthropic.ToolUnion[] = [
     { type: "web_fetch_20250910", name: "web_fetch", max_uses: 8, max_content_tokens: 12000 },
@@ -199,13 +222,27 @@ async function check(client: Anthropic, d: Draft, emit: Emit) {
   );
   const call = findToolUse(message, "submit_verdicts");
   const parsed = call ? Verdicts.safeParse(call.input) : null;
-  if (!parsed?.success) {
+  return parsed?.success ? parsed.data.verdicts : null;
+}
+
+async function check(d: Draft, getVerdicts: (claims: CheckableClaim[]) => Promise<Verdict[] | null>) {
+  const uncertainties: string[] = [];
+  const claims = collectClaims(d, uncertainties);
+  if (!claims.length) return { checked: 0, supported: 0, downgraded: 0, notes: [], uncertainties };
+  let verdicts: Verdict[] | null;
+  try {
+    verdicts = await getVerdicts(claims);
+  } catch (e) {
+    verdicts = null;
+    uncertainties.push(`The fact-check pass failed (${e instanceof Error ? e.message : e}); claims were left as drafted.`);
+  }
+  if (!verdicts) {
     return { checked: 0, supported: 0, downgraded: 0, notes: ["Checker did not return verdicts; claims left as drafted."], uncertainties };
   }
   let supported = 0;
   let downgraded = 0;
   const notes: string[] = [];
-  for (const v of parsed.data.verdicts) {
+  for (const v of verdicts) {
     const c = claims.find((x) => x.id === v.id);
     if (!c) continue;
     c.apply(v.verdict, v.note);
@@ -216,12 +253,21 @@ async function check(client: Anthropic, d: Draft, emit: Emit) {
   return { checked: claims.length, supported, downgraded, notes, uncertainties };
 }
 
-/** Enforce the evidence invariants no matter what the model wrote. */
-function sanitize(d: Draft): Draft {
+/**
+ * Enforce the evidence invariants no matter what the model wrote. When we know which pages
+ * were really fetched (server-side research), claims citing only unfetched pages become uncertain.
+ */
+export function sanitize(d: Draft, readUrls?: Set<string>): Draft {
   const ids = new Set(d.sources.map((s) => s.id));
+  const unread = new Set(readUrls ? d.sources.filter((s) => !readUrls.has(normalizeUrl(s.url))).map((s) => s.id) : []);
+  let downgradedUnread = 0;
   const fix = <T extends { evidence: string; sourceIds: string[] }>(x: T): T => {
     x.sourceIds = x.sourceIds.filter((id) => ids.has(id));
     if (x.evidence === "tested" || x.sourceIds.length === 0) x.evidence = "uncertain";
+    else if (x.evidence !== "uncertain" && x.sourceIds.every((id) => unread.has(id))) {
+      x.evidence = "uncertain";
+      downgradedUnread++;
+    }
     return x;
   };
   fix(d.composio);
@@ -229,6 +275,14 @@ function sanitize(d: Draft): Draft {
   fix(d.time);
   fix(d.review);
   [...d.prerequisites, ...d.steps, ...d.scopes, ...d.blockers, ...d.nuances].forEach(fix);
+  if (downgradedUnread) {
+    d.uncertainties.push(
+      `${downgradedUnread} claim(s) cited pages the research agent never actually opened (${d.sources
+        .filter((s) => unread.has(s.id))
+        .map((s) => s.url)
+        .join(", ")}); they are marked Unconfirmed.`,
+    );
+  }
   return d;
 }
 
@@ -268,18 +322,35 @@ export async function composioCheck(candidates: string[]): Promise<Guide["compos
   return null;
 }
 
-export async function generateGuide(query: string, emit: Emit, opts: { client?: Anthropic } = {}): Promise<Guide | null> {
+type Researched = { kind: "guide"; data: Draft; readUrls?: Set<string> } | { kind: "not_oauth"; data: z.infer<typeof NotOauth> };
+
+async function researchWithGemini(gemini: GeminiLike, query: string, today: string, emit: Emit): Promise<Researched> {
+  const { notes, pages } = await geminiResearchNotes(gemini, query, today, emit);
+  emit({ type: "activity", kind: "note", message: `Writing the guide from ${pages.filter((p) => p.ok).length} pages read` });
+  const { data } = await geminiStructured(gemini, GeminiEnvelope, GEMINI_STRUCTURE_SYSTEM(today), structurePrompt(query, notes, pages), emit);
+  if (data.status === "not_oauth" && data.notOauth) return { kind: "not_oauth", data: data.notOauth };
+  return { kind: "guide", data: data.guide!, readUrls: new Set(pages.filter((p) => p.ok).map((p) => normalizeUrl(p.url))) };
+}
+
+export async function generateGuide(
+  query: string,
+  emit: Emit,
+  opts: { client?: Anthropic; gemini?: GeminiLike; provider?: Provider } = {},
+): Promise<Guide | null> {
   const started = Date.now();
   const today = new Date().toISOString().slice(0, 10);
-  const client = opts.client ?? new Anthropic();
+  const provider: Provider | null = opts.provider ?? (opts.gemini ? "gemini" : opts.client ? "anthropic" : pickProvider());
+  if (!provider) throw new Error("No model is configured: set GEMINI_API_KEY (free from Google AI Studio) or ANTHROPIC_API_KEY on the server.");
+  const client = provider === "anthropic" ? (opts.client ?? new Anthropic()) : null;
+  const gemini = provider === "gemini" ? (opts.gemini ?? newGeminiClient()) : null;
 
   emit({ type: "stage", stage: "research", message: `Researching ${query}: finding the developer portal, OAuth docs and review policies` });
-  const r = await research(client, query, today, emit);
+  const r: Researched = gemini ? await researchWithGemini(gemini, query, today, emit) : await research(client!, query, today, emit);
   if (r.kind === "not_oauth") {
     emit({ type: "not_oauth", message: `${r.data.reason} Supported auth: ${r.data.authMethods.join(", ") || "unknown"}.`, docsUrl: r.data.docsUrl });
     return null;
   }
-  const draft = sanitize(r.data);
+  const draft = sanitize(r.data, r.readUrls);
   draft.sources.forEach((s) => (s.checkedAt = today));
 
   emit({ type: "stage", stage: "probe", message: "Running live checks on endpoints, portal and sources" });
@@ -287,7 +358,9 @@ export async function generateGuide(query: string, emit: Emit, opts: { client?: 
   probes.forEach((p) => emit({ type: "probe", probe: p }));
 
   emit({ type: "stage", stage: "check", message: "Second pass: re-reading cited pages to verify each claim" });
-  const checker = await check(client, draft, emit);
+  const checker = await check(draft, (claims) =>
+    gemini ? geminiCheck(gemini, claims, emit) : claudeVerdicts(client!, draft, claims, emit),
+  );
   draft.uncertainties.push(...checker.uncertainties);
 
   const composio = await composioCheck(toolkitCandidates(draft.name, query));
@@ -301,7 +374,7 @@ export async function generateGuide(query: string, emit: Emit, opts: { client?: 
     meta: {
       origin: "agent",
       lastVerified: today,
-      model: model(),
+      model: providerModel(provider),
       durationMs: Date.now() - started,
       checker: { checked: checker.checked, supported: checker.supported, downgraded: checker.downgraded, notes: checker.notes },
       corrections: [],

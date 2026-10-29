@@ -1,4 +1,4 @@
-import { generateGuide, type AgentEvent } from "@/lib/agent/generate";
+import { generateGuide, pickProvider, type AgentEvent } from "@/lib/agent/generate";
 import { findInLibrary } from "@/lib/library";
 import { loadGuide, saveGuide, slugify, storageMode } from "@/lib/store";
 
@@ -15,8 +15,11 @@ export async function POST(req: Request) {
   if (required && body.passcode !== required) {
     return Response.json({ error: "This deployment requires a passcode to generate new guides.", needsPasscode: true }, { status: 401 });
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return Response.json({ error: "Live generation is not configured: set ANTHROPIC_API_KEY on the server." }, { status: 503 });
+  if (!pickProvider()) {
+    return Response.json(
+      { error: "Live generation is not configured: set GEMINI_API_KEY (free from Google AI Studio) or ANTHROPIC_API_KEY on the server." },
+      { status: 503 },
+    );
   }
 
   const enc = new TextEncoder();

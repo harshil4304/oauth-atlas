@@ -2,20 +2,27 @@
  * Runs the live research agent on apps we verified by hand and compares field by field,
  * then on a few apps outside the library for manual spot checks.
  *
- *   ANTHROPIC_API_KEY=... npm run eval                 # default set
- *   ANTHROPIC_API_KEY=... npm run eval -- github slack # chosen library apps
+ *   npm run eval                  # default set (reads keys from .env.local)
+ *   npm run eval -- github slack  # chosen library apps only
+ *
+ * With a free Gemini key the default set is smaller and runs are spaced out, because
+ * free-tier quotas are per minute and per day (each guide uses roughly 5–10 requests).
  *
  * Writes docs/evaluation-results.md and docs/evaluation-results.json.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
-import { generateGuide } from "../src/lib/agent/generate";
+import { generateGuide, pickProvider, providerModel } from "../src/lib/agent/generate";
 import { compareGuides, type EvalRow } from "../src/lib/evaluate";
 import { getLibraryGuide } from "../src/lib/library";
 import { scoreGuide, timeHeadline } from "../src/lib/rubric";
 import type { Guide } from "../src/lib/schema";
 
-const DEFAULT_KNOWN = ["github", "google-gmail", "slack", "hubspot", "zoom", "x-twitter"];
-const UNSEEN = ["Calendly", "Linear", "Airtable"];
+const provider = pickProvider();
+const FREE_GEMINI = provider === "gemini";
+const DEFAULT_KNOWN = FREE_GEMINI ? ["github", "slack", "google-gmail"] : ["github", "google-gmail", "slack", "hubspot", "zoom", "x-twitter"];
+const UNSEEN = FREE_GEMINI ? ["Calendly"] : ["Calendly", "Linear", "Airtable"];
+const PAUSE_MS = FREE_GEMINI ? 60_000 : 0;
+const pause = () => (PAUSE_MS ? (console.log(`  (pausing ${PAUSE_MS / 1000}s for the free-tier per-minute limit)`), new Promise((r) => setTimeout(r, PAUSE_MS))) : Promise.resolve());
 
 async function run(query: string): Promise<{ guide: Guide | null; ms: number; activity: number }> {
   const t = Date.now();
@@ -28,10 +35,11 @@ async function run(query: string): Promise<{ guide: Guide | null; ms: number; ac
 }
 
 async function main() {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("Set ANTHROPIC_API_KEY first.");
+  if (!provider) {
+    console.error("Add GEMINI_API_KEY (or ANTHROPIC_API_KEY) to .env.local first.");
     process.exit(1);
   }
+  console.log(`Using ${provider} (${providerModel(provider)})`);
   const args = process.argv.slice(2);
   const known = args.length ? args : DEFAULT_KNOWN;
   const rows: (EvalRow & { seconds: number })[] = [];
@@ -44,6 +52,7 @@ async function main() {
       failures.push(`${slug}: not in library`);
       continue;
     }
+    if (rows.length || failures.length) await pause();
     console.log(`\n▶ ${ref.name} (library comparison)`);
     try {
       const { guide, ms } = await run(ref.name);
@@ -59,6 +68,7 @@ async function main() {
 
   if (!args.length) {
     for (const q of UNSEEN) {
+      await pause();
       console.log(`\n▶ ${q} (unseen)`);
       try {
         const { guide, ms } = await run(q);
@@ -85,7 +95,7 @@ async function main() {
 
   const pct = (n: number, d: number) => (d ? `${Math.round((100 * n) / d)}%` : "n/a");
   const L: string[] = [];
-  L.push(`# Agent evaluation results`, "", `Run on ${new Date().toISOString().slice(0, 10)} with model ${process.env.OAUTH_ATLAS_MODEL || "claude-sonnet-5-5"}.`, "");
+  L.push(`# Agent evaluation results`, "", `Run on ${new Date().toISOString().slice(0, 10)} with ${provider} model ${providerModel(provider)}.`, "");
   L.push(`## Against hand-verified library guides`, "");
   L.push(`| App | Library | Agent | Difficulty overlaps | Factors match / hedged / conflict | Wait overlaps | Claims cited | Checker | Live checks | Time |`);
   L.push(`|---|---|---|---|---|---|---|---|---|---|`);

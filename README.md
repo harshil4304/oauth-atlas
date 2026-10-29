@@ -67,7 +67,7 @@ See [`docs/verification.md`](docs/verification.md). Highlights:
   - Some scope names and some review timings: marked Unconfirmed in the guides.
   - No real approvals were submitted.
 
-Agent quality is measured with `npm run eval`. It generates guides for hand-verified apps and scores agreement on difficulty, each factor, wait time, citation coverage and checker results, then generates three apps outside the library for spot checks. Results go to `docs/evaluation-results.md`. That run needs an API key, so it isn't included unless you run it.
+Agent quality is measured with `npm run eval`. It generates guides for hand-verified apps and scores agreement on difficulty, each factor, wait time, citation coverage and checker results, then generates three apps outside the library for spot checks. Results go to `docs/evaluation-results.md`. That run needs a model key, so it isn't included unless you run it. With a free Gemini key it uses a smaller set and pauses between apps to stay inside free limits.
 
 ## Run it locally
 
@@ -75,36 +75,41 @@ Requires Node 20.6+ (Node 22 LTS recommended).
 
 ```bash
 npm install
-cp .env.example .env.local   # add ANTHROPIC_API_KEY for live generation
+cp .env.example .env.local   # add GEMINI_API_KEY (free) or ANTHROPIC_API_KEY for live generation
 npm run dev                  # http://localhost:3000
 npm test                     # schema, rubric, probes, agent pipeline (simulated model), evaluation logic
 ```
 
-The library, compare, method and share pages work without any key. Only live generation needs `ANTHROPIC_API_KEY`.
+The library, compare, method and share pages work without any key. Only live generation needs a model key: a free Gemini key from [Google AI Studio](https://aistudio.google.com/apikey) works.
 
 ### Environment variables
 
 | Variable | Needed for | Notes |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Live generation | Server-side only; never sent to the browser |
-| `OAUTH_ATLAS_MODEL` | Optional | Defaults to `claude-sonnet-5-5` |
+| `GEMINI_API_KEY` | Live generation with Gemini (free tier works) | Server-side only; never sent to the browser |
+| `GEMINI_MODEL` | Optional | Defaults to `gemini-3.5-flash-lite`, which has the largest free daily quota; `gemini-3.8-flash` writes better guides but its free quota is small |
+| `ANTHROPIC_API_KEY` | Live generation with Claude (paid) | Server-side only |
+| `OAUTH_ATLAS_MODEL` | Optional | Claude model, defaults to `claude-sonnet-5-5` |
+| `LLM_PROVIDER` | Optional | `gemini` or `anthropic` when both keys are set; otherwise a Gemini key wins |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (or `KV_REST_API_URL`, `KV_REST_API_TOKEN`) | Durable share links for generated guides on Vercel | Without them, guides are saved to `.data/` locally or temporary storage on Vercel; the self-contained link always works |
 | `COMPOSIO_API_KEY` | Optional | Fills in Composio-managed status for generated guides and for `npm run sync:composio` |
-| `GENERATE_PASSCODE` | Optional | Requires a passcode before spending API credits on new guides |
+| `GENERATE_PASSCODE` | Optional | Requires a passcode before using your API quota on new guides |
 
 ### Deploy (Vercel)
 
 1. Push this repo to GitHub.
 2. Import it in Vercel. No build settings to change.
-3. Add `ANTHROPIC_API_KEY`, and preferably an Upstash Redis integration from the Vercel Marketplace, which sets the two Upstash variables.
+3. Add `GEMINI_API_KEY` (or `ANTHROPIC_API_KEY`) and `GENERATE_PASSCODE`, and preferably an Upstash Redis integration from the Vercel Marketplace, which sets the storage variables.
 4. Generation runs in a streaming route with `maxDuration = 300`; a typical guide takes one to three minutes.
 
 ## How it's built
 
 - **Next.js 16 App Router, TypeScript, Tailwind v4, Zod.**
 - **Library guides:** `data/guides/*.json`, validated at build time.
-- **Live agent:** `src/lib/agent/generate.ts`.
-  - Research pass: Claude with server-side `web_search` and `web_fetch`, ending in a `submit_guide` tool call whose input schema is generated from the Zod schema. Invalid output gets up to two repair rounds.
+- **Live agent:** `src/lib/agent/generate.ts`, with two interchangeable research back ends that produce the same guide format and share the same rules (`src/lib/agent/prompts.ts`):
+  - **Gemini** (`src/lib/agent/gemini.ts`), built for a free Google AI Studio key. Google Search grounding isn't part of the free tier, so our server does the web work (`src/lib/agent/web.ts`): Gemini calls `search_web` and `fetch_page` as functions, our server runs them, and Gemini writes research notes with a URL after every fact. A second call turns the notes into the guide with Gemini's structured JSON output, using a schema converted from Zod (`gemini-schema.ts`). Because the server did the fetching, we know exactly which pages were read: claims citing pages that were never opened are automatically marked Unconfirmed. Requests are rationed for free quotas (several fetches per turn, a turn cap, about 5–10 requests per guide) and rate-limit errors are retried or explained.
+  - **Claude** (paid key): server-side `web_search` and `web_fetch`, ending in a `submit_guide` tool call whose input schema is generated from the Zod schema.
+  - Invalid output gets repair rounds in both.
   - Credential-free live probes (`src/lib/probes.ts`).
   - Fact-check pass: re-fetches cited pages and returns per-claim verdicts.
   - Deterministic scoring.
@@ -115,6 +120,7 @@ The library, compare, method and share pages work without any key. Only live gen
 
 - **Guides go stale.** Four of twelve providers changed meaningfully in the last 18 months. Each guide shows its check date, and the live checks only prove endpoints and pages still exist, not that policies are unchanged.
 - **Wait times are partly anecdotal.** Where providers don't publish numbers, ranges come from developer reports or are labelled unconfirmed estimates.
+- **Free Gemini keys have small quotas.** Expect a handful of guides per day per key, depending on the model's free limits; the app tells you when the daily quota is used up. The keyless web search our server uses for Gemini can be blocked by the search engine; the agent then relies on known documentation URLs and the links on pages it fetches.
 - **Generated guides depend on public docs.** Providers that hide their review process behind a partner login will produce guides with many Unknowns. That is shown as a wide difficulty range rather than a confident guess.
 - **No real approvals were submitted**, and no provider consoles were driven while building this.
 - **No user accounts.** Checklist progress is stored per browser.
