@@ -21,6 +21,8 @@ export const newGeminiClient = (): GeminiLike => new GoogleGenAI({ apiKey: gemin
 
 const MAX_TURNS = Number(process.env.GEMINI_MAX_TURNS || 7);
 const MAX_CALLS_PER_TURN = 6;
+/** Hosting platforms cap request time (Vercel Hobby: 300s), so research stops early enough to finish. */
+const RESEARCH_BUDGET_MS = Number(process.env.GEMINI_RESEARCH_BUDGET_MS || 150_000);
 
 type Emit = (e: { type: "activity"; kind: "search" | "fetch" | "note"; message: string }) => void;
 
@@ -91,6 +93,7 @@ export async function geminiResearchNotes(client: GeminiLike, query: string, tod
   const config = { systemInstruction: GEMINI_RESEARCH_SYSTEM(today, MAX_TURNS), tools: TOOLS };
   let notes = "";
   let requests = 0;
+  const deadline = Date.now() + RESEARCH_BUDGET_MS;
 
   const exec = async (call: FunctionCall, i: number): Promise<Record<string, unknown>> => {
     const args = (call.args ?? {}) as { query?: string; url?: string };
@@ -113,6 +116,10 @@ export async function geminiResearchNotes(client: GeminiLike, query: string, tod
   };
 
   for (let turn = 0; turn < MAX_TURNS; turn++) {
+    if (Date.now() > deadline) {
+      emit({ type: "activity", kind: "note", message: "Time budget reached; writing up what was found" });
+      break;
+    }
     const res = await withGeminiRetry(() => client.models.generateContent({ model: geminiModel(), contents, config }), emit);
     requests++;
     const calls = res.functionCalls ?? [];
