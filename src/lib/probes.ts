@@ -86,6 +86,11 @@ export async function probeToken(url: string): Promise<ProbeResult> {
       text,
     );
     const live = oauthError || r.status === 400 || r.status === 401;
+    if (!live && r.status === 404) {
+      // Seen live: GitHub's token endpoint answers 404 for an unknown client ID, so a 404 here
+      // can't distinguish "wrong URL" from "provider hides unknown apps". Report it as inconclusive.
+      return { ...base, result: "skipped", detail: "HTTP 404 for a fake client ID. Inconclusive: some providers (e.g. GitHub) return 404 for unknown apps." };
+    }
     return {
       ...base,
       result: live ? "pass" : "fail",

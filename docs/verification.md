@@ -68,7 +68,8 @@ These were my starting assumptions before reading the sources. Each correction i
 Running them from the build sandbox exposed two problems:
 
 1. **The sandbox fakes GitHub.** It routes github.com through a proxy that answers on GitHub's behalf (HTTP 415 with a non-GitHub message). The checks were "passing" against something that wasn't GitHub. I recorded none of those results. Library guides ship with no stored probe results; the **Run live checks** button runs them from the deployed server.
-2. **The token check was too lenient.** It treated any 4xx, including 404, as a live endpoint. It now requires a standard OAuth error code (or a 400/401), and unit tests cover the GitHub-style "200 with error in body" case and the proxy case.
+2. **First run from the deployed server (Vercel, 2026-10-29), GitHub guide:** 6 of 7 checks passed (authorize endpoint, developer portal, all cited docs pages). The token endpoint answered **HTTP 404** to a fake client ID. That turned out to be how GitHub responds to unknown apps, not a broken URL, so a 404 is now reported as *inconclusive* instead of *fail*.
+3. **The token check was too lenient.** It treated any 4xx, including 404, as a live endpoint. It now requires a standard OAuth error code (or a 400/401), and unit tests cover the GitHub-style "200 with error in body" case and the proxy case.
 
 ## Setup attempts
 

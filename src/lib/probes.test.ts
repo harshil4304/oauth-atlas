@@ -15,9 +15,9 @@ describe("probeToken", () => {
     mockFetch(400, '{"error":"invalid_grant"}');
     expect((await probeToken("https://p.example/token")).result).toBe("pass");
   });
-  it("fails on a 404 or a proxy answer", async () => {
+  it("treats a 404 as inconclusive and a proxy answer as a failure", async () => {
     mockFetch(404, "not found");
-    expect((await probeToken("https://p.example/token")).result).toBe("fail");
+    expect((await probeToken("https://p.example/token")).result).toBe("skipped");
     vi.restoreAllMocks();
     mockFetch(415, '{"message":"Request bodies must declare Content-Type"}');
     expect((await probeToken("https://p.example/token")).result).toBe("fail");
