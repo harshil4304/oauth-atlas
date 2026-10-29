@@ -1,5 +1,13 @@
 # OAuth Atlas
 
+**Live app:** https://oauth-atlas-beta.vercel.app
+
+**Try it:**
+- Open a library guide, e.g. [Google (Gmail)](https://oauth-atlas-beta.vercel.app/apps/google-gmail), [Slack](https://oauth-atlas-beta.vercel.app/apps/slack) or [GitHub](https://oauth-atlas-beta.vercel.app/apps/github).
+- Or type any app name or website into the search box to watch the agent research it and write a guide live (1–3 minutes). Live generation asks for a passcode, shared with the submission, so the free model quota isn't used up by strangers.
+- [Compare two apps](https://oauth-atlas-beta.vercel.app/compare?a=github&b=google-gmail) and read [how we rate](https://oauth-atlas-beta.vercel.app/method).
+- What was checked, corrected and left unconfirmed: [`docs/verification.md`](docs/verification.md).
+
 Look up an app and find out what it takes to register an OAuth app with that provider and get it approved, so your AI agent's users can connect it. Each guide covers:
 - The difficulty.
 - Your hands-on time and the approval wait.
